@@ -1,0 +1,47 @@
+﻿#pragma kernel Initialize
+#pragma kernel Update
+#pragma kernel Draw
+
+RWTexture2D<int>  stateTexture;
+RWTexture2D<float4> drawTexture;
+
+float random(float2 x)
+{
+	return frac(sin(dot(x.xy, float2(12.9898, 78.233))) * 43758.5453);
+}
+
+[numthreads(8, 8, 1)]
+void Initialize(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+	stateTexture[dispatchThreadId.xy] = random(dispatchThreadId.xy) < 0.4 ? 0 : 1;
+}
+
+[numthreads(8, 8, 1)]
+void Update(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+
+	int state = stateTexture[dispatchThreadId.xy];
+
+	int neighbors = 0;
+	neighbors += stateTexture[dispatchThreadId.xy + uint2(-1, -1)];
+	neighbors += stateTexture[dispatchThreadId.xy + uint2(-1, 0)];
+	neighbors += stateTexture[dispatchThreadId.xy + uint2(-1, 1)];
+	neighbors += stateTexture[dispatchThreadId.xy + uint2(0, -1)];
+	neighbors += stateTexture[dispatchThreadId.xy + uint2(0, 1)];
+	neighbors += stateTexture[dispatchThreadId.xy + uint2(1, -1)];
+	neighbors += stateTexture[dispatchThreadId.xy + uint2(1, 0)];
+	neighbors += stateTexture[dispatchThreadId.xy + uint2(1, 1)];
+
+	if ((state == 0 && neighbors == 3) || (state == 1 && (neighbors == 2 || neighbors == 3))) {
+		stateTexture[dispatchThreadId.xy] = 1;
+	}
+	else {
+		stateTexture[dispatchThreadId.xy] = 0;
+	}
+}
+
+[numthreads(8, 8, 1)]
+void Draw(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+	drawTexture[dispatchThreadId.xy] = stateTexture[dispatchThreadId.xy] == 1 ? float4(0, 1, 0, 1) : float4(0, 0, 0, 0);
+}

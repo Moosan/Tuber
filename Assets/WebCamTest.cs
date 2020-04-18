@@ -3,7 +3,7 @@ using UnityEngine.UI;
 public class WebCamTest : MonoBehaviour
 {
 
-    public Image _image;
+    public MeshRenderer _renderer;
 
     WebCamTexture webCamTexture;
     WebCamDevice[] webCamDevice;
@@ -13,7 +13,7 @@ public class WebCamTest : MonoBehaviour
     { 
         webCamDevice = WebCamTexture.devices;
         webCamTexture = new WebCamTexture(webCamDevice[0].name);
-        _image.material.mainTexture = webCamTexture;
+        _renderer.material.mainTexture = webCamTexture;
         webCamTexture.Play();
     }
 }
